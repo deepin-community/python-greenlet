@@ -1,4 +1,3 @@
-From 3b236b70093af95e96d52e167e6d60e5defde08e Mon Sep 17 00:00:00 2001
 From: Robin Jarry <robin@jarry.cc>
 Date: Wed, 3 Nov 2021 14:21:00 +0100
 Subject: setup: use absolute paths
@@ -8,16 +7,12 @@ required because pybuild runs tests into a temp dir which is a sub
 folder of the sources.
 
 Signed-off-by: Robin Jarry <robin@jarry.cc>
----
- setup.py | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/setup.py b/setup.py
-index cccc701ce524..e8befe0c989d 100755
---- a/setup.py
-+++ b/setup.py
-@@ -95,8 +95,12 @@ else:
-         )
+=== modified file 'setup.py'
+--- old/setup.py	2022-11-22 01:54:52 +0000
++++ new/setup.py	2022-11-22 02:05:11 +0000
+@@ -163,8 +163,12 @@
+     ]
  
  
 +def abspath(rel):
@@ -25,12 +20,12 @@ index cccc701ce524..e8befe0c989d 100755
 +
 +
  def get_greenlet_version():
--    with open('src/greenlet/__init__.py') as f:
-+    with open(abspath('src/greenlet/__init__.py')) as f:
+-    with open('src/greenlet/__init__.py') as f: # pylint:disable=unspecified-encoding
++    with open(abspath('src/greenlet/__init__.py')) as f: # pylint:disable=unspecified-encoding
          looking_for = '__version__ = \''
          for line in f:
              if line.startswith(looking_for):
-@@ -109,7 +113,7 @@ setup(
+@@ -177,7 +181,7 @@
      name="greenlet",
      version=get_greenlet_version(),
      description='Lightweight in-process concurrent programming',
@@ -39,6 +34,4 @@ index cccc701ce524..e8befe0c989d 100755
      long_description_content_type="text/x-rst",
      url="https://greenlet.readthedocs.io/",
      keywords="greenlet coroutine concurrency threads cooperative",
--- 
-2.30.2
 

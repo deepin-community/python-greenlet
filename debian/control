@@ -6,6 +6,8 @@ Uploaders: Sandro Tosi <morph@debian.org>,
 Build-Depends: debhelper-compat (= 13),
                dh-python,
                python3-all-dev,
+               python3-objgraph,
+               python3-psutil,
                python3-setuptools,
                python3-sphinx,
                sphinx-common
