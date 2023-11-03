@@ -48,15 +48,18 @@ Functions
 
     Macro that returns true if the greenlet *g* has started and has not died.
 
-.. c:function:: PyGreenlet* PyGreenlet_GET_PARENT(PyGreenlet* g)
+.. c:function:: PyGreenlet* PyGreenlet_GetParent(PyGreenlet* g)
 
-    Macro that returns the parent greenlet of *g*.
+    Macro that returns the parent greenlet of *g*. Returns a non-null
+    pointer if there is a parent, or a null pointer on an error or if
+    there is no parent. If this returns a non-null pointer, you must
+    decrement its reference.
 
 .. c:function:: int PyGreenlet_SetParent(PyGreenlet* g, PyGreenlet* nparent)
 
     Set the parent greenlet of *g*.
 
-    :return: 0 for succes, or -1 on error. When an error is returned,
+    :return: 0 for success, or -1 on error. When an error is returned,
              *g* is not a pointer to a greenlet, and an
              :exc:`AttributeError` has been raised.
 

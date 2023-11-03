@@ -2,6 +2,183 @@
  Changes
 =========
 
+2.0.2 (2023-01-28)
+==================
+
+- Fix calling ``greenlet.settrace()`` with the same tracer object that
+  was currently active. See `issue 332
+  <https://github.com/python-greenlet/greenlet/issues/332>`_.
+- Various compilation and standards conformance fixes. See #335, #336,
+  #300, #302, #334.
+
+
+
+2.0.1 (2022-11-07)
+==================
+
+- Python 3.11: Fix a memory leak. See `issue 328
+  <https://github.com/python-greenlet/greenlet/issues/328>`_ and
+  `gevent issue 1924 <https://github.com/gevent/gevent/issues/1924>`_.
+
+
+2.0.0.post0 (2022-11-03)
+========================
+
+- Add ``Programming Language :: Python :: 3.11`` to the PyPI
+  classifier metadata.
+
+
+2.0.0 (2022-10-31)
+==================
+
+- Nothing changed yet.
+
+
+2.0.0rc5 (2022-10-31)
+=====================
+
+- Linux: Fix another group of rare crashes that could occur when shutting down an
+  interpeter running multiple threads. See `issue 325 <https://github.com/python-greenlet/greenlet/issues/325>`_.
+
+
+2.0.0rc4 (2022-10-30)
+=====================
+
+- Linux: Fix a rare crash that could occur when shutting down an
+  interpreter running multiple threads, when some of those threads are
+  in greenlets making calls to functions that release the GIL.
+
+
+2.0.0rc3 (2022-10-29)
+=====================
+
+- Python 2: Fix a crash that could occur when raising an old-style
+  instance object.
+
+
+2.0.0rc2 (2022-10-28)
+=====================
+
+- Workaround `a CPython 3.8 bug
+  <https://github.com/python/cpython/issues/81308>`_ that could cause
+  the interpreter to crash during an early phase of shutdown with the
+  message "Fatal Python error: Python memory allocator called without
+  holding the GI." This only impacted CPython 3.8a3 through CPython
+  3.9a5; the fix is only applied to CPython 3.8 releases (please don't
+  use an early alpha release of CPython 3.9).
+
+
+2.0.0rc1 (2022-10-27)
+=====================
+
+- Deal gracefully with greenlet switches that occur while deferred
+  deallocation of objects is happening using CPython's "trash can"
+  mechanism. Previously, if a large nested container held items that
+  switched greenlets during delayed deallocation, and that second
+  greenlet also invoked the trash can, CPython's internal state could
+  become corrupt. This was visible as an assertion error in debug
+  builds. Now, the relevant internal state is saved and restored
+  during greenlet switches. See also `gevent issue 1909
+  <https://github.com/gevent/gevent/issues/1909>`_.
+- Rename the C API function ``PyGreenlet_GET_PARENT`` to
+  ``PyGreenlet_GetParent`` for consistency. The old name remains
+  available as a deprecated alias.
+
+
+
+2.0.0a2 (2022-03-24)
+====================
+
+- Fix a crash on older versions of the Windows C runtime when an
+  unhandled C++ exception was thrown inside a greenlet by another
+  native extension. This is a bug in that extension, and the
+  interpreter will still abort, but at least it does so deliberately.
+  Thanks to Kirill Smelkov. See `PR 286
+  <https://github.com/python-greenlet/greenlet/pull/286>`_.
+- Musllinux wheels for aarch64 are now built, tested, and uploaded to
+  PyPI. Thanks to Alexander Piskun.
+- This version of greenlet is known to compile and pass tests on
+  CPython 3.11.0a6. Earlier 3.11 releases will not work; later
+  releases may or may not work. See `PR 294
+  <https://github.com/python-greenlet/greenlet/pull/294>`_. Special
+  thanks to Victor Stinner, Brandt Bucher and the CPython developers.
+
+
+2.0.0a1 (2022-01-20)
+====================
+
+Platforms
+---------
+
+- Add experimental, untested support for 64-bit Windows on ARM using
+  MSVC. See `PR 271 <https://github.com/python-greenlet/greenlet/pull/271>`_.
+
+- Drop support for very old versions of GCC and MSVC.
+
+- Compilation now requires a compiler that either supports C++11 or
+  has some other intrinsic way to create thread local variables; for
+  older GCC, clang and SunStudio we use ``__thread``, while for older
+  MSVC we use ``__declspec(thread)``.
+
+- Wheels compatible with the musllinux specification are built,
+  tested, and uploaded to PyPI for x86_64. (This was retroactively
+  done for version 1.1.2 as well.)
+
+- This version of greenlet is known to compile and pass tests on
+  CPython 3.11.0a4. Earlier or later 3.11 releases may or may not
+  work. See `PR 280
+  <https://github.com/python-greenlet/greenlet/pull/280>`_. Special
+  thanks to Brandt Bucher and the CPython developers.
+
+Fixes
+-----
+
+- Fix several leaks that could occur when using greenlets from
+  multiple threads. For example, it is no longer necessary to call
+  ``getcurrent()`` before exiting a thread to allow its main greenlet
+  to be cleaned up. See `issue 252 <https://github.com/python-greenlet/greenlet/issues/251>`_.
+
+- Fix the C API ``PyGreenlet_Throw`` to perform the same error
+  checking that the Python API ``greenlet.throw()`` does. Previously,
+  it did no error checking.
+
+- Fix C++ exception handling on 32-bit Windows. This might have
+  ramifications if you embed Python in your application and also use
+  SEH on 32-bit windows, or if you embed Python in a C++ application.
+  Please contact the maintainers if you have problems in this area.
+
+  In general, C++ exception handling is expected to be better on most
+  platforms. This work is ongoing.
+
+Changes
+-------
+
+- The repr of some greenlets has changed. In particular, if the
+  greenlet object was running in a thread that has exited, the repr
+  now indicates that. *NOTE:* The repr of a greenlet is not part of
+  the API and should not be relied upon by production code. It is
+  likely to differ in other implementations such as PyPy.
+
+- Main greenlets from threads that have exited are now marked as dead.
+
+
+1.1.3.post0 (2022-10-10)
+========================
+
+- Add musllinux (Alpine) binary wheels.
+
+.. important:: This preliminary support for Python 3.11 leaks memory.
+               Please upgrade to greenlet 2 if you're using Python 3.11.
+
+1.1.3 (2022-08-25)
+==================
+
+- Add support for Python 3.11. Please note that Windows binary wheels
+  are not available at this time.
+
+.. important:: This preliminary support for Python 3.11 leaks memory.
+               Please upgrade to greenlet 2 if you're using Python 3.11.
+
 1.1.2 (2021-09-29)
 ==================
 
@@ -24,6 +201,7 @@
   work as expected. See `issue 256
   <https://github.com/python-greenlet/greenlet/issues/256>`_, reported
   by Joe Rickerby.
+
 
 1.1.1 (2021-08-06)
 ==================
@@ -223,9 +401,9 @@ Packaging Changes
 =====
 * Greenlet has an instance dictionary now, which means it can be
   used for implementing greenlet local storage, etc. However, this
-  might introduce incompatibility if subclasses have __dict__ in their
-  __slots__. Classes like that will fail, because greenlet already
-  has __dict__ out of the box.
+  might introduce incompatibility if subclasses have ``__dict__`` in their
+  ``__slots__``. Classes like that will fail, because greenlet already
+  has ``__dict__`` out of the box.
 * Greenlet no longer leaks memory after thread termination, as long as
   terminated thread has no running greenlets left at the time.
 * Add support for debian sparc and openbsd5-sparc64
