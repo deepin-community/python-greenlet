@@ -11,6 +11,7 @@ Build-Depends: debhelper-compat (= 13),
                python3-setuptools,
                python3-sphinx,
                sphinx-common
+Rules-Requires-Root: no
 Standards-Version: 4.6.0.1
 Section: python
 Homepage: https://pypi.python.org/pypi/greenlet
