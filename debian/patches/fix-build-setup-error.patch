@@ -1,0 +1,16 @@
+--- python-greenlet-3.0.1.orig/setup.py
++++ python-greenlet-3.0.1/setup.py
+@@ -116,10 +116,11 @@ def readfile(filename):
+ def abspath(rel):
+     return os.path.join(os.path.dirname(__file__), rel)
+ 
+-GREENLET_SRC_DIR = abspath('src/greenlet/')
++# Use relative paths for setuptools - absolute paths cause build errors
++GREENLET_SRC_DIR = 'src/greenlet/'
+ GREENLET_HEADER_DIR = GREENLET_SRC_DIR
+ GREENLET_HEADER = GREENLET_HEADER_DIR + 'greenlet.h'
+-GREENLET_TEST_DIR = abspath('src/greenlet/tests/')
++GREENLET_TEST_DIR = 'src/greenlet/tests/'
+ # The location of the platform specific assembly files
+ # for switching.
+ GREENLET_PLATFORM_DIR = GREENLET_SRC_DIR + 'platform/'

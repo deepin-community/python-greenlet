@@ -1,0 +1,22 @@
+--- python-greenlet-3.0.1.orig/docs/conf.py
++++ python-greenlet-3.0.1/docs/conf.py
+@@ -41,7 +41,7 @@ extensions = [
+ templates_path = []  # ['_templates']
+ 
+ # The suffix of source filenames.
+-source_suffix = '.rst'
++source_suffix = {'.rst': 'restructuredtext'}
+ 
+ # The encoding of source files.
+ #source_encoding = 'utf-8-sig'
+@@ -252,8 +252,8 @@ texinfo_documents = [
+ #texinfo_show_urls = 'footnote'
+ 
+ intersphinx_mapping = {
+-    'https://docs.python.org/': None,
+-    'https://www.gevent.org/': None,
++    'python': ('https://docs.python.org/3/', None),
++    'gevent': ('https://www.gevent.org/', None),
+ }
+ 
+ 
