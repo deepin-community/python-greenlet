@@ -1,8 +1,40 @@
-python-greenlet (3.0.1-3deepin1) unstable; urgency=medium
+python-greenlet (3.2.4-2) unstable; urgency=medium
 
-  * feat: add sw64 support.
+  * Move to unstable.
 
- -- hudeng <hudeng@deepin.org>  Wed, 04 Jun 2025 11:15:31 +0800
+ -- Colin Watson <cjwatson@debian.org>  Wed, 29 Oct 2025 11:16:43 +0000
+
+python-greenlet (3.2.4-1) experimental; urgency=medium
+
+  [ Alexandre Detiste ]
+  * fix syntax error in Maintainer: field that confuses UDD & the Tracker
+  * use dh-sequence-python3
+  * bump Standards-Version to 4.7.2
+
+  [ Colin Watson ]
+  * Remove dangling .PHONY entry that broke the build
+  * Remove an ancient override for Python 3.7
+  * New upstream release:
+    - Fix crashes on 32-bit PPC Linux (closes: #1082800).
+    - Make greenlet build and run on Python 3.14 (closes: #1117906).
+  * Require tests to pass on ppc64el; they seem to have passed for years
+
+ -- Colin Watson <cjwatson@debian.org>  Fri, 24 Oct 2025 17:49:28 +0100
+
+python-greenlet (3.1.0-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream release.
+    - Supports sh4 (Closes: #1066996)
+    - Supports Python 3.13 (Closes: #1081542)
+  * Drop patch arm32-tests, superseded upstream.
+  * Build-Depend on furo sphinx theme.
+  * Support the nodoc build profile.
+  * Bump Standards-Version to 4.7.0, no changes needed.
+  * Bump copyright years.
+  * Drop XB-Python-Version, no longer used.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 20 Sep 2024 19:00:48 +0200
 
 python-greenlet (3.0.1-3) unstable; urgency=medium
 

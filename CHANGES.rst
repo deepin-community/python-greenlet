@@ -2,6 +2,130 @@
  Changes
 =========
 
+3.2.4 (2025-08-07)
+==================
+
+.. note::
+
+   The 3.2.x series will be the last to support Python 3.9.
+
+- Various small build/test changes for less common configurations (e.g.,
+  building CPython with assertions enabled but NOT debugging),
+  contributed by Michał Górny. Note that while greenlet will BUILD in
+  a free-threaded Python, it will cause the GIL to be allocated and
+  used, and memory may leak. Also note that these configurations
+  are not tested by this project's CI.
+- Fix an assertion error on debug builds of Python 3.14 when using the
+  experimental JIT. See :issue:`460
+  <https://github.com/python-greenlet/greenlet/issues/460>`_.
+
+
+3.2.3 (2025-06-05)
+==================
+
+- Make greenlet build and run on Python 3.14 beta 2 on Windows amd64.
+- Potentially fix build on NetBSD/sparc64. See `PR 447
+  <https://github.com/python-greenlet/greenlet/pull/447>`_.
+
+
+3.2.2 (2025-05-09)
+==================
+
+- Make greenlet build and run on Python 3.14 beta 1. It will not run
+  on earlier versions of 3.14; it should run on subsequent versions.
+  See `PR 445 <https://github.com/python-greenlet/greenlet/pull/445>`_.
+
+
+3.2.1 (2025-04-22)
+==================
+
+- Fix a crash regression for Riscv64. See `issue 443
+  <https://github.com/python-greenlet/greenlet/issues/443>`_.
+
+
+3.2.0 (2025-04-15)
+==================
+
+- Remove support for Python 3.7 and 3.8.
+- Add untested, community supported implementation for RiscV 32. See
+  `PR 438 <https://github.com/python-greenlet/greenlet/pull/439>`_.
+- Make greenlet build and run on Python 3.14a7. It will not build on
+  earlier 3.14 alpha releases, and may not build on later 3.14
+  releases.
+- Packaging: Use :pep:`639` license expressions and include license files.
+
+3.1.1 (2024-09-20)
+==================
+
+- Fix crashes on 32-bit PPC Linux. Note that there is no CI for this,
+  and support is best effort; there may be other issues lurking.
+  See `issue 422
+  <https://github.com/python-greenlet/greenlet/issues/422>`_.
+- Remove unnecessary logging sometimes during interpreter shutdown.
+  See `issue 426 <https://github.com/python-greenlet/greenlet/issues/426>`_.
+- Fix some crashes on 32-bit PPC MacOS. This is a very old platform,
+  and is only known to be tested on beta versions of an operating
+  system that was never released, using the GCC 14 only provided by
+  MacPorts; it may or may not work on the final MacOS X release that
+  supported 32-bit PowerPC. It has the known issue of leaking memory
+  when greenlets are used in multiple threads. Help debugging this
+  would be appreciated. See `PR 419
+  <https://github.com/python-greenlet/greenlet/pull/419>`_.
+
+3.1.0 (2024-09-10)
+==================
+
+.. note::
+
+    This will be the last release to support Python 3.7 and 3.8.
+
+- Adds support for Python 3.13.
+
+.. note::
+
+   greenlet will not work in no-gil (free threaded) builds of CPython.
+   Internally, greenlet heavily depends on the GIL.
+
+- Greatly reduce the chances for crashes during interpreter shutdown.
+  See `issue 411
+  <https://github.com/python-greenlet/greenlet/issues/411>`_.
+
+Platform Support
+----------------
+
+Support for the following platforms was contributed by the community.
+Note that they are untested by this project's continuous integration
+services.
+
+- Hitachi's `SuperH CPU <https://github.com/python-greenlet/greenlet/issues/166>`_.
+- `NetBSD on PowerPC.
+  <https://github.com/python-greenlet/greenlet/pull/402>`_
+- RiscV 64 with `-fno-omit-frame-pointer
+  <https://github.com/python-greenlet/greenlet/pull/404>`_. Note that
+  there are `known test failures
+  <https://github.com/python-greenlet/greenlet/issues/403>`_, so this
+  platform may not work reliably at all.
+
+
+3.0.3 (2023-12-21)
+==================
+
+- Python 3.12: Restore the full ability to walk the stack of a suspended
+  greenlet; previously only the innermost frame was exposed. See `issue 388
+  <https://github.com/python-greenlet/greenlet/issues/388>`_. Fix by
+  Joshua Oreman in `PR 393
+  <https://github.com/python-greenlet/greenlet/pull/393/>`_.
+
+3.0.2 (2023-12-08)
+==================
+
+- Packaging: Add a minimal ``pyproject.toml`` to sdists.
+- Packaging: Various updates to macOS wheels.
+- Fix a test case on Arm32. Note that this is not a supported platform
+  (there is no CI for it) and support is best effort; there may be
+  other issues lurking. See `issue 385 <https://github.com/python-greenlet/greenlet/issues/385>`_
+
+
 3.0.1 (2023-10-25)
 ==================
 
@@ -156,7 +280,7 @@ Known Issues
 =====================
 
 - Linux: Fix another group of rare crashes that could occur when shutting down an
-  interpeter running multiple threads. See `issue 325 <https://github.com/python-greenlet/greenlet/issues/325>`_.
+  interpreter running multiple threads. See `issue 325 <https://github.com/python-greenlet/greenlet/issues/325>`_.
 
 
 2.0.0rc4 (2022-10-30)
@@ -226,7 +350,7 @@ Known Issues
 ====================
 
 Platforms
-~~~~~~~~~
+---------
 
 - Add experimental, untested support for 64-bit Windows on ARM using
   MSVC. See `PR 271 <https://github.com/python-greenlet/greenlet/pull/271>`_.
@@ -376,7 +500,7 @@ Changes
 - (Documentation) Publish the change log to https://greenlet.readthedocs.io
 
 Supported Platforms
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 - Drop support for Python 2.4, 2.5, 2.6, 3.0, 3.1, 3.2 and 3.4.
   The project metadata now includes the ``python_requires`` data to
@@ -386,7 +510,7 @@ Supported Platforms
   <https://github.com/python-greenlet/greenlet/pull/197>`_.
 
 Packaging Changes
-~~~~~~~~~~~~~~~~~
+-----------------
 
 - Require setuptools to build from source.
 - Stop asking setuptools to build both .tar.gz and .zip

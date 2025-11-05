@@ -23,7 +23,17 @@ using greenlet::refs::BorrowedGreenlet;
 #endif
 
 #if GREENLET_PY312
+#  define Py_BUILD_CORE
 #  include "internal/pycore_frame.h"
+#endif
+
+#if GREENLET_PY314
+#  include "internal/pycore_interpframe_structs.h"
+#if defined(_MSC_VER) || defined(__MINGW64__)
+#   include "greenlet_msvc_compat.hpp"
+#else
+#  include "internal/pycore_interpframe.h"
+#endif
 #endif
 
 // XXX: TODO: Work to remove all virtual functions
@@ -104,24 +114,45 @@ namespace greenlet
         _PyCFrame* cframe;
         int use_tracing;
 #endif
-#if GREENLET_PY312
+#if GREENLET_PY314
+        int py_recursion_depth;
+        // I think this is only used by the JIT. At least,
+        // we only got errors not switching it when the JIT was enabled.
+        //    Python/generated_cases.c.h:12469: _PyEval_EvalFrameDefault:
+        //      Assertion `tstate->current_executor == NULL' failed.
+        // see https://github.com/python-greenlet/greenlet/issues/460
+        PyObject* current_executor;
+#elif GREENLET_PY312
         int py_recursion_depth;
         int c_recursion_depth;
 #else
         int recursion_depth;
 #endif
+#if GREENLET_PY313
+        PyObject *delete_later;
+#else
         int trash_delete_nesting;
+#endif
 #if GREENLET_PY311
         _PyInterpreterFrame* current_frame;
         _PyStackChunk* datastack_chunk;
         PyObject** datastack_top;
         PyObject** datastack_limit;
 #endif
-#if GREENLET_PY312
-        _PyInterpreterFrame* _prev_frame;
-#endif
+        // The PyInterpreterFrame list on 3.12+ contains some entries that are
+        // on the C stack, which can't be directly accessed while a greenlet is
+        // suspended. In order to keep greenlet gr_frame introspection working,
+        // we adjust stack switching to rewrite the interpreter frame list
+        // to skip these C-stack frames; we call this "exposing" the greenlet's
+        // frames because it makes them valid to work with in Python. Then when
+        // the greenlet is resumed we need to remember to reverse the operation
+        // we did. The C-stack frames are "entry frames" which are a low-level
+        // interpreter detail; they're not needed for introspection, but do
+        // need to be present for the eval loop to work.
+        void unexpose_frames();
 
     public:
+
         PythonState();
         // You can use this for testing whether we have a frame
         // or not. It returns const so they can't modify it.
@@ -137,7 +168,8 @@ namespace greenlet
 #if GREENLET_USE_CFRAME
         void set_new_cframe(_PyCFrame& frame) noexcept;
 #endif
-        inline void may_switch_away() noexcept;
+
+        void may_switch_away() noexcept;
         inline void will_switch_from(PyThreadState *const origin_tstate) noexcept;
         void did_finish(PyThreadState* tstate) noexcept;
     };
@@ -186,6 +218,14 @@ namespace greenlet
 #ifdef GREENLET_USE_STDIO
         friend std::ostream& operator<<(std::ostream& os, const StackState& s);
 #endif
+
+        // Fill in [dest, dest + n) with the values that would be at
+        // [src, src + n) while this greenlet is running. This is like memcpy
+        // except that if the greenlet is suspended it accounts for the portion
+        // of the greenlet's stack that was spilled to the heap. `src` may
+        // be on this greenlet's stack, or on the heap, but not on a different
+        // greenlet's stack.
+        void copy_from_stack(void* dest, const void* src, size_t n) const;
     };
 #ifdef GREENLET_USE_STDIO
     std::ostream& operator<<(std::ostream& os, const StackState& s);
@@ -296,6 +336,7 @@ namespace greenlet
     {
     private:
         G_NO_COPIES_OF_CLS(Greenlet);
+        PyGreenlet* const _self;
     private:
         // XXX: Work to remove these.
         friend class ThreadState;
@@ -308,6 +349,8 @@ namespace greenlet
         PythonState python_state;
         Greenlet(PyGreenlet* p, const StackState& initial_state);
     public:
+        // This constructor takes ownership of the PyGreenlet, by
+        // setting ``p->pimpl = this;``.
         Greenlet(PyGreenlet* p);
         virtual ~Greenlet();
 
@@ -377,6 +420,19 @@ namespace greenlet
         // was running in was known to have exited.
         void deallocing_greenlet_in_thread(const ThreadState* current_state);
 
+        // Must be called on 3.12+ before exposing a suspended greenlet's
+        // frames to user code. This rewrites the linked list of interpreter
+        // frames to skip the ones that are being stored on the C stack (which
+        // can't be safely accessed while the greenlet is suspended because
+        // that stack space might be hosting a different greenlet), and
+        // sets PythonState::frames_were_exposed so we remember to restore
+        // the original list before resuming the greenlet. The C-stack frames
+        // are a low-level interpreter implementation detail; while they're
+        // important to the bytecode eval loop, they're superfluous for
+        // introspection purposes.
+        void expose_frames();
+
+
         // TODO: Figure out how to make these non-public.
         inline void slp_restore_state() noexcept;
         inline int slp_save_state(char *const stackref) noexcept;
@@ -425,7 +481,10 @@ namespace greenlet
 
         // Return a borrowed greenlet that is the Python object
         // this object represents.
-        virtual BorrowedGreenlet self() const noexcept = 0;
+        inline BorrowedGreenlet self() const noexcept
+        {
+            return BorrowedGreenlet(this->_self);
+        }
 
         // For testing. If this returns true, we should pretend that
         // slp_switch() failed.
@@ -609,7 +668,6 @@ public:
     {
     private:
         static greenlet::PythonAllocator<UserGreenlet> allocator;
-        BorrowedGreenlet _self;
         OwnedMainGreenlet _main_greenlet;
         OwnedObject _run_callable;
         OwnedGreenlet _parent;
@@ -638,7 +696,6 @@ public:
 
         virtual const refs::BorrowedMainGreenlet main_greenlet() const;
 
-        virtual BorrowedGreenlet self() const noexcept;
         virtual void murder_in_place();
         virtual bool belongs_to_thread(const ThreadState* state) const;
         virtual int tp_traverse(visitproc visit, void* arg);
@@ -712,7 +769,6 @@ public:
         virtual ThreadState* thread_state() const noexcept;
         void thread_state(ThreadState*) noexcept;
         virtual OwnedObject g_switch();
-        virtual BorrowedGreenlet self() const noexcept;
         virtual int tp_traverse(visitproc visit, void* arg);
     };
 

@@ -64,7 +64,7 @@ if (
 
 if sys.platform == 'darwin' or 'clang' in plat_compiler:
     # The clang compiler doesn't use --std=c++11 by default
-    cpp_compile_args.append("--std=gnu++11")
+    cpp_compile_args.append("--std=c++11")
 elif is_win and "MSC" in plat_compiler:
     # Older versions of MSVC (Python 2.7) don't handle C++ exceptions
     # correctly by default. While newer versions do handle exceptions
@@ -108,6 +108,11 @@ elif is_win and "MSC" in plat_compiler:
     # variables on the stack, leading to having to split some
     # functions up. Revisit those.
     cpp_compile_args.append("/GT")
+
+    # MSVC won't handle named struct initializers with its default
+    # standard. It complains about them instead and tells us to add
+    # this:
+    cpp_compile_args.append('/std:c++20')
 
 def readfile(filename):
     with open(filename, 'r') as f: # pylint:disable=unspecified-encoding
@@ -218,8 +223,13 @@ setup(
         'Bug Tracker': 'https://github.com/python-greenlet/greenlet/issues',
         'Source Code': 'https://github.com/python-greenlet/greenlet/',
         'Documentation': 'https://greenlet.readthedocs.io/',
+        'Changes': 'https://greenlet.readthedocs.io/en/latest/changes.html',
     },
-    license="MIT License",
+    license="MIT AND Python-2.0",
+    license_files=[
+        'LICENSE',
+        'LICENSE.PSF',
+    ],
     platforms=['any'],
     package_dir={'': 'src'},
     packages=find_packages('src'),
@@ -229,29 +239,30 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: C',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     extras_require={
         'docs': [
             'Sphinx',
+            'furo',
         ],
         'test': [
             'objgraph',
             'psutil',
+            'setuptools',
         ],
     },
-    python_requires=">=3.7",
+    python_requires=">=3.9",
     zip_safe=False,
 )
