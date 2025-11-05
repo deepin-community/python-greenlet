@@ -49,6 +49,7 @@ License: PSFL-2
 Files: debian/*
 Copyright: (c) 2012- Laszlo Boszormenyi (GCS) <gcs@debian.org>,
  (c) 2010-2012 Örjan Persson <orange@fobie.net>
+ 2022-2024 Stefano Rivera <stefanor@debian.org>
 License: GPL-3
 
 License: GPL-3

@@ -12,10 +12,10 @@ Signed-off-by: Robin Jarry <robin@jarry.cc>
  1 file changed, 7 insertions(+), 4 deletions(-)
 
 diff --git a/setup.py b/setup.py
-index 60a6776..23b8dd4 100755
+index c0e3c34..ef1094d 100755
 --- a/setup.py
 +++ b/setup.py
-@@ -113,10 +113,13 @@ def readfile(filename):
+@@ -118,10 +118,13 @@ def readfile(filename):
      with open(filename, 'r') as f: # pylint:disable=unspecified-encoding
          return f.read()
  
@@ -31,7 +31,7 @@ index 60a6776..23b8dd4 100755
  # The location of the platform specific assembly files
  # for switching.
  GREENLET_PLATFORM_DIR = GREENLET_SRC_DIR + 'platform/'
-@@ -193,7 +196,7 @@ else:
+@@ -198,7 +201,7 @@ else:
  
  
  def get_greenlet_version():
@@ -40,7 +40,7 @@ index 60a6776..23b8dd4 100755
          looking_for = '__version__ = \''
          for line in f:
              if line.startswith(looking_for):
-@@ -206,7 +209,7 @@ setup(
+@@ -211,7 +214,7 @@ setup(
      name="greenlet",
      version=get_greenlet_version(),
      description='Lightweight in-process concurrent programming',
